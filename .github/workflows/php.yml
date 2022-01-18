@@ -62,7 +62,7 @@ jobs:
       run: sudo apt install nginx
 
     - name: copy nginx config file
-      run: sudo sed 's/php7.4-fpm/php${{ matrix.php-versions }}-fpm/g' tests/RESTAPI/fusionsuite.conf > /etc/nginx/sites-available/
+      run: sudo sed 's/php7.4-fpm/php${{ matrix.php-versions }}-fpm/g' tests/RESTAPI/fusionsuite.conf > /etc/nginx/sites-available/fusionsuite.conf
 
     - name: start nginx
       run: sudo systemctl start nginx
