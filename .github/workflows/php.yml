@@ -49,11 +49,20 @@ jobs:
     - name: Run phpcs
       run: phpcs -q --report=checkstyle src | cs2pr
 
+    - name: Setup php-fpm
+      env:
+        version: ${{ matrix.php-versions }}
+      run: |
+        sudo apt-get install php$version-fpm
+        sudo cp /usr/sbin/php-fpm$version /usr/bin/php-fpm # copy to /usr/bin
+        sudo service php$version-fpm start
+        sudo service php$version-fpm status
+
     - name: install nginx
       run: sudo apt install nginx
 
     - name: copy nginx config file
-      run: sudo cp tests/RESTAPI/fusionsuite.conf /etc/nginx/sites-available/
+      run: sudo sed 's/php7.4-fpm/php${{ matrix.php-versions }}-fpm/g' tests/RESTAPI/fusionsuite.conf > /etc/nginx/sites-available/
 
     - name: start nginx
       run: sudo systemctl start nginx
@@ -71,5 +80,7 @@ jobs:
         yarn install
 
     - name: run REST API tests
-      run: cd tests/RESTAPI/ && ./node_modules/.bin/mocha --ignore "./node_modules/**/*.js" "./**/*.js"
+      run: |
+        cd tests/RESTAPI/
+        ./node_modules/.bin/mocha --ignore "./node_modules/**/*.js" "./**/*.js"
 
