@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  NODE_VERSION: '16.x'
+
 jobs:
   build:
 
@@ -45,3 +48,28 @@ jobs:
 
     - name: Run phpcs
       run: phpcs -q --report=checkstyle src | cs2pr
+
+    - name: install nginx
+      run: sudo apt install nginx
+
+    - name: copy nginx config file
+      run: sudo cp tests/RESTAPI/fusionsuite.conf /etc/nginx/sites-available/
+
+    - name: start nginx
+      run: sudo systemctl start nginx
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'yarn'
+        cache-dependency-path: tests/RESTAPI/yarn.lock
+
+    - name: yarn install
+      run: |
+        cd tests/RESTAPI/
+        yarn install
+
+    - name: run REST API tests
+      run: cd tests/RESTAPI/ && ./node_modules/.bin/mocha --ignore "./node_modules/**/*.js" "./**/*.js"
+

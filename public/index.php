@@ -57,7 +57,7 @@ $app->add(new Tuupola\Middleware\JwtAuthentication([
    "before" => function ($request, $arguments) {
       $myUser = \App\v1\Models\User::find($arguments['decoded']['user_id']);
       if ($myUser['jwtid'] != $arguments['decoded']['jti']) {
-         throw new Exception("jti changed, ask for a new token", 401);
+         throw new Exception("jti changed, ask for a new token ".$myUser['jwtid'].' != '.$arguments['decoded']['jti'], 401);
       }
    },
    "error" => function ($response, $arguments) {

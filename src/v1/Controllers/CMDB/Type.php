@@ -106,21 +106,37 @@ final class Type
    * @apiUse AutorizationHeader
    *
    * @apiSuccess {String}  name     The name of the type of items.
+   *
+   * @apiParamExample {json} Request-Example:
+   * {
+   *   "name": "Firewall",
+   * } 
+   * 
+   * @apiSuccessExample {json} Success-Response:
+   * HTTP/1.1 200 OK
+   * {
+   *   "id":10
+   * }
+   * 
+   * @apiErrorExample {json} Error-Response:
+   * HTTP/1.1 400 Bad Request
+   * {
+   *   "status: "error",
+   *   "message": "The Name is required"
+   * }
+   *
    */
   public function postItem(Request $request, Response $response, $args): Response
   {
     $token = $request->getAttribute('token');
 
     $data = json_decode($request->getBody());
-    if (\App\v1\Post::PostHasProperties($data, ['name']) === false)
-    {
-      throw new \Exception('Post data not conform (missing fields), check the documentation', 400);
-    }
 
-    if (\App\v1\Common::checkValueRight($data->name, "string") === false)
-    {
-      throw new \Exception("Post data not conform (value not allowed in field 'name'), check the documentation", 400);
-    }
+    // Validate the data format
+    $dataFormat = [
+      'name' => 'required'
+    ];
+    \App\v1\Common::validateData($data, $dataFormat);
 
     // TODO manage modeling
 
@@ -143,6 +159,24 @@ final class Type
    * @apiParam {Number}    id        Unique ID of the type.
    *
    * @apiSuccess {String}  name      Name of the type.
+   * 
+   * @apiParamExample {json} Request-Example:
+   * {
+   *   "name": "Firewall2",
+   * } 
+   * 
+   * @apiSuccessExample {json} Success-Response:
+   * HTTP/1.1 200 OK
+   * [
+   * ]
+   * 
+   * @apiErrorExample {json} Error-Response:
+   * HTTP/1.1 400 Bad Request
+   * {
+   *   "status: "error",
+   *   "message": "The Name is required"
+   * }
+   * 
    */
   public function patchItem(Request $request, Response $response, $args): Response
   {
@@ -156,10 +190,11 @@ final class Type
       throw new \Exception("The type has not be found", 404);
     }
 
-    if (\App\v1\Post::PostHasProperties($data, ['name']) === false)
-    {
-      throw new \Exception('Patch data not conform (missing field name), check the documentation', 400);
-    }
+    // Validate the data format
+    $dataFormat = [
+      'name' => 'required'
+    ];
+    \App\v1\Common::validateData($data, $dataFormat);
 
     $type->name = $data->name;
     $type->save();
@@ -167,6 +202,32 @@ final class Type
     $response->getBody()->write(json_encode([]));
     return $response->withHeader('Content-Type', 'application/json');
   }
+
+  public function deleteItem(Request $request, Response $response, $args): Response
+  {
+    $token = $request->getAttribute('token');
+
+    $type = \App\v1\Models\CMDB\Type::withTrashed()->find($args['id']);
+
+    if (is_null($type))
+    {
+      throw new \Exception("The type has not be found", 404);
+    }
+
+    // If in soft trash, delete permanently
+    if ($type->trashed())
+    {
+      $type->forceDelete();
+    }
+    else
+    {
+      $type->delete();
+    }
+
+    $response->getBody()->write(json_encode([]));
+    return $response->withHeader('Content-Type', 'application/json');
+  }
+
 
   /**
    * @api {post} /v1/cmdb/type/:id/property/:propertyid Associate a property of this type

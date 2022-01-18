@@ -21,8 +21,11 @@ namespace App\v1\Models\CMDB;
 use Illuminate\Database\Eloquent\Model as Model;
 use App\v1\Controllers\Rule as Rule;
 use Illuminate\Events\Dispatcher as Dispatcher;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Type extends Model {  
+class Type extends Model { 
+  
+  use SoftDeletes;
 
   protected $appends = [
     'properties',

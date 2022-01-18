@@ -65,10 +65,11 @@ final class Route
         {
           $type->map(['GET'], '', \App\v1\Controllers\CMDB\Type::class . ':getAll');
           $type->map(['POST'], '', \App\v1\Controllers\CMDB\Type::class . ':postItem');
-          $type->map(['PATCH'], '', \App\v1\Controllers\CMDB\Type::class . ':patchItem');
           $type->group("/{id:[0-9]+}", function (RouteCollectorProxy $typeid)
           {
             $typeid->map(['GET'], '', \App\v1\Controllers\CMDB\Type::class . ':getOne');
+            $typeid->map(['PATCH'], '', \App\v1\Controllers\CMDB\Type::class . ':patchItem');
+            $typeid->map(['DELETE'], '', \App\v1\Controllers\CMDB\Type::class . ':deleteItem');
             $typeid->group("/property", function (RouteCollectorProxy $property)
             {
               $property->map(['POST'], '/{propertyid:[0-9]+}', \App\v1\Controllers\CMDB\Type::class . ':postProperty');
