@@ -34,14 +34,17 @@ return
             'port' => '3306',
             'charset' => 'utf8',
         ],
-        'development' => [
+	'development' => [
+		/*
             'adapter' => 'mysql',
             'host' => 'localhost',
             'name' => 'fusionsuite_dev',
             'user' => 'root',
             'pass' => '',
             'port' => '3306',
-            'charset' => 'utf8',
+	    'charset' => 'utf8',
+		*/
+	    'dsn' => getenv('DATABASE_URL'),
         ],
         'testing' => [
             'adapter' => 'mysql',
